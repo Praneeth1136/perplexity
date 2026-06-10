@@ -75,3 +75,12 @@ export const loginValidator = [
 
   handleValidationErrors
 ];
+
+export const resendVerificationValidator = [
+  body("email")
+    .trim()
+    .notEmpty().withMessage("Email is required")
+    .isEmail().withMessage("Email must be valid"),
+
+  handleValidationErrors
+];

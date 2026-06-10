@@ -56,6 +56,65 @@ export async function register(req, res) {
 };
 
 
+export async function resendVerification(req, res) {
+    try {
+        const { email } = req.body;
+
+        const user = await userModel.findOne({ email });
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
+                success: false,
+            });
+        }
+
+        if (user.verified) {
+            return res.status(400).json({
+                message: "Email is already verified",
+                success: false,
+            });
+        }
+
+        const resendVerificationToken = jwt.sign(
+            { email: user.email },
+            process.env.JWT_SECRET,
+            { expiresIn: "1h" }
+        );
+
+        await sendEmail({
+            to: email,
+            subject: "Perplexity Email Verification",
+            text: `Hi ${user.username},\n\nPlease verify your email by clicking the link below.\n\n${process.env.APP_URL || "http://localhost:3000"}/api/auth/verify-email?token=${resendVerificationToken}\n\nBest regards,\nThe Perplexity Team`,
+            html: `
+                <div style="font-family: Arial, sans-serif; color: #333;">
+                    <h1>Hello ${user.username},</h1>
+                    <p>You requested a new verification email. Click the button below to verify your address.</p>
+                    <p>
+                        <a href="${process.env.APP_URL || "http://localhost:3000"}/api/auth/verify-email?token=${resendVerificationToken}"
+                           style="display: inline-block; padding: 10px 18px; background: #4A90E2; color: #ffffff; text-decoration: none; border-radius: 5px;">
+                            Verify Your Email
+                        </a>
+                    </p>
+                    <p>If you didn't request this, please ignore this email.</p>
+                    <p>Best regards,<br/><strong>The Perplexity Team</strong></p>
+                </div>
+            `,
+        });
+
+        return res.status(200).json({
+            message: "Verification email sent",
+            success: true,
+        });
+    } catch (err) {
+        console.error("resendVerification error:", err);
+        return res.status(500).json({
+            message: "Unable to resend verification email",
+            success: false,
+        });
+    }
+}
+
+
 export async function verifyEmail(req, res) {
     try {
         const { token } = req.query;

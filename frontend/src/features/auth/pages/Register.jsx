@@ -1,76 +1,87 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/userAuth';
 
 export default function Register() {
-  const [form, setForm] = useState({ username: '', email: '', password: '' })
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { handleRegister } = useAuth();
+  const navigate = useNavigate();
 
-  function handleChange(e) {
-    const { name, value } = e.target
-    setForm((s) => ({ ...s, [name]: value }))
-  }
-
-  function handleSubmit(e) {
-    e.preventDefault()
-    // Replace with real register call
-    console.log('Register:', form)
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const result = await handleRegister({ username, email, password });
+    if (result) {
+      navigate('/login');
+    }
   }
 
   return (
-    <>
-    <div className="min-h-screen flex items-center justify-center p-6" style={{
-      background: `radial-gradient(1200px 600px at 10% 10%, rgba(78,153,163,0.12), transparent 10%), 
-                   radial-gradient(900px 400px at 90% 90%, rgba(0,0,0,0.18), transparent 20%), 
-                   #0b0f12`
-    }}>
-      <div className="w-full max-w-md bg-linear-to-b from-white/2 to-white/1 rounded-lg p-7 shadow-2xl border border-primary/10">
-        <h2 className="text-xl font-bold text-primary mb-3">Create account</h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <label className="flex flex-col text-xs text-muted">
-            Username
+    <div className="min-h-screen flex items-center justify-center bg-gray-950 px-4">
+      <div className="w-full max-w-md bg-gray-900 rounded-2xl shadow-2xl border border-gray-800 p-8">
+        <h2 className="text-2xl font-bold text-white mb-6 text-center">Create an Account</h2>
+        
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          
+          {/* Username Field */}
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-1">Username</label>
             <input
-              name="username"
-              value={form.username}
-              onChange={handleChange}
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
-              className="mt-2 px-3 py-2 rounded-lg border border-white/4 bg-white/2 text-cyan-subtle placeholder-white/30 outline-none focus:border-primary/30"
-              placeholder="Your username"
+              className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              placeholder="Choose a username"
             />
-          </label>
+          </div>
 
-          <label className="flex flex-col text-xs text-muted">
-            Email
+          {/* Email Field */}
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-1">Email Address</label>
             <input
-              name="email"
               type="email"
-              value={form.email}
-              onChange={handleChange}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
-              className="mt-2 px-3 py-2 rounded-lg border border-white/4 bg-white/2 text-cyan-subtle placeholder-white/30 outline-none focus:border-primary/30"
+              className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               placeholder="you@example.com"
             />
-          </label>
+          </div>
 
-          <label className="flex flex-col text-xs text-muted">
-            Password
+          {/* Password Field */}
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-1">Password</label>
             <input
-              name="password"
               type="password"
-              value={form.password}
-              onChange={handleChange}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
-              className="mt-2 px-3 py-2 rounded-lg border border-white/4 bg-white/2 text-cyan-subtle placeholder-white/30 outline-none focus:border-primary/30"
-              placeholder="Create a password"
+              className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              placeholder="Create a strong password"
             />
-          </label>
+          </div>
 
-          <button type="submit" className="mt-1 px-3 py-2 rounded-lg bg-linear-to-r from-primary to-[#2b7e7f] text-white font-semibold hover:opacity-90 transition">Register</button>
+          {/* Submit Button */}
+          <button 
+            type="submit" 
+            className="w-full mt-2 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-200 cursor-pointer"
+          >
+            Register
+          </button>
         </form>
 
-        <p className="mt-4 text-xs text-muted">
-          Already have an account? <Link to="/login" className="text-primary font-semibold hover:underline">Login</Link></p>
-		</div>
+        {/* Toggle to Login */}
+        <div className="mt-6 text-center">
+          <p className="text-gray-400 text-sm">
+            Already have an account?{' '}
+            <Link to="/login" className="text-blue-500 hover:text-blue-400 font-medium transition">
+              Sign in
+            </Link>
+          </p>
         </div>
-    </>
-	)
+      </div>
+    </div>
+  );
 }
-

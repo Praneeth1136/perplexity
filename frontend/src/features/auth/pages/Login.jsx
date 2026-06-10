@@ -1,63 +1,89 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/userAuth';
+import { useSelector } from 'react-redux';
 
 export default function Login() {
-	const [form, setForm] = useState({ email: '', password: '' })
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-	function handleChange(e) {
-		const { name, value } = e.target
-		setForm((s) => ({ ...s, [name]: value }))
-	}
+  const { handleLogin } = useAuth();
 
-	function handleSubmit(e) {
-		e.preventDefault()
-		// Replace with real login call
-		console.log('Login:', form)
-	}
+  const navigate = useNavigate();
 
-	return (
-		<div className="min-h-screen flex items-center justify-center p-6" style={{
-			background: `radial-gradient(1200px 600px at 10% 10%, rgba(78,153,163,0.12), transparent 10%), 
-						 radial-gradient(900px 400px at 90% 90%, rgba(0,0,0,0.18), transparent 20%), 
-						 #0b0f12`
-		}}>
-			<div className="w-full max-w-md bg-linear-to-b from-white/2 to-white/1 rounded-lg p-7 shadow-2xl border border-primary/10">
-				<h2 className="text-xl font-bold text-primary mb-3">Welcome back</h2>
-				<form onSubmit={handleSubmit} className="flex flex-col gap-3">
-					<label className="flex flex-col text-xs text-muted">
-						Email
-						<input
-							name="email"
-							type="email"
-							value={form.email}
-							onChange={handleChange}
-							required
-							className="mt-2 px-3 py-2 rounded-lg border border-white/4 bg-white/2 text-cyan-subtle placeholder-white/30 outline-none focus:border-primary/30"
-							placeholder="you@example.com"
-						/>
-					</label>
+  const handleSubmit = async(e)=> {
+    e.preventDefault();
+    console.log('Login Payload:', { email, password });
 
-					<label className="flex flex-col text-xs text-muted">
-						Password
-						<input
-							name="password"
-							type="password"
-							value={form.password}
-							onChange={handleChange}
-							required
-							className="mt-2 px-3 py-2 rounded-lg border border-white/4 bg-white/2 text-cyan-subtle placeholder-white/30 outline-none focus:border-primary/30"
-							placeholder="Your password"
-						/>
-					</label>
+	await handleLogin({email,password})
+	navigate("/");
+  }
 
-					<button type="submit" className="auth-button">Login</button>
-				</form>
 
-				<p className="auth-footer">
-					Don’t have an account? <Link to="/register">Register</Link>
-				</p>
-			</div>
-		</div>
-	)
+  const user = useSelector((state) => state.auth.user);
+  const loading = useSelector((state) => state.auth.loading);
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate('/');
+    }
+  }, [loading, user, navigate]);
+
+  return (
+    // min-h-screen + flex + items-center + justify-center perfectly centers the card
+    <div className="min-h-screen flex items-center justify-center bg-gray-950 px-4">
+      
+      {/* The main form container */}
+      <div className="w-full max-w-md bg-gray-900 rounded-2xl shadow-2xl border border-gray-800 p-8">
+        <h2 className="text-2xl font-bold text-white mb-6 text-center">Welcome Back</h2>
+        
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          
+          {/* Email Field */}
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-1">Email Address</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              placeholder="you@example.com"
+            />
+          </div>
+
+          {/* Password Field */}
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-1">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              placeholder="Enter your password"
+            />
+          </div>
+
+          {/* Submit Button */}
+          <button 
+            type="submit" 
+            className="w-full mt-2 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-200 cursor-pointer"
+          >
+            Sign In
+          </button>
+        </form>
+
+        {/* Toggle to Register */}
+        <div className="mt-6 text-center">
+          <p className="text-gray-400 text-sm">
+            Don't have an account?{' '}
+            <Link to="/register" className="text-blue-500 hover:text-blue-400 font-medium transition">
+              Create one
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
-
