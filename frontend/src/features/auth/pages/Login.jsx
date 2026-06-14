@@ -29,6 +29,8 @@ export default function Login() {
     }
   }, [loading, user, navigate]);
 
+ 
+
   return (
     // min-h-screen + flex + items-center + justify-center perfectly centers the card
     <div className="min-h-screen flex items-center justify-center bg-gray-950 px-4">

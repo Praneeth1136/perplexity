@@ -23,6 +23,11 @@ export function useAuth() {
       dispatch(setLoading(true));
       const data = await login({ email, password });
 
+      // store user in redux so Protected routes can detect auth state
+      if (data && data.user) {
+        dispatch(setUser(data.user));
+      }
+
       return data;
     } catch (error) {
       dispatch(setError(error.response?.data?.message || 'Login failed'));
