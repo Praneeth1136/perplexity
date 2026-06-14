@@ -1,6 +1,9 @@
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import {ChatMistralAI} from "@langchain/mistralai";
-import {HumanMessage,SystemMessage,AIMessage} from "langchain"
+import {HumanMessage,SystemMessage,AIMessage,tool, createAgent} from "langchain"
+import { z } from "zod";
+import { searchInternet } from './internet.service.js';
+
 
 
 const geminiModel = new ChatGoogleGenerativeAI({
@@ -13,28 +16,44 @@ const mistralModel = new ChatMistralAI({
   apikey: process.env.MISTRAL_API_KEY,
 })
 
-// export async function testAI() {
-//   try {
-//     const response = await model.invoke('what is the capital of india?');
-//     console.log(response.text);
-//   } catch (error) {
-//     console.warn('AI test failed:', error?.message || error);
-//   }
-// }
+const searchInternetTool = tool(
+  searchInternet,
+  {
+    name:"searchInternet", 
+    description:"Search the internet for current information",
+    schema:z.object({
+      query:z.string().describe("Search query for the internet")
+    })
+  }
+)
 
+
+const agent = createAgent({
+  model:geminiModel,
+  tools:[searchInternetTool],
+  
+})
 
 
 export async function generateResponse(messages){
-  const response  = await geminiModel.invoke(messages.map(msg => {
+  const response  = await agent.invoke({
+    messages:[
+      new SystemMessage(`You are a helpful assistant. Search the internet for current information using the searchInternet tool when needed. 
+      
+      If you don't find the answer in the search results, respond with your own knowledge
+      `),
+    ...messages.map(msg => {
     if(msg.role === "user"){
       return new HumanMessage(msg.content)
     }else{
       return new AIMessage(msg.content)
     }
   })
+  ]
+  }
   );
 
-  return response.text;
+  return response.messages[response.messages.length-1].text;
 }
 
 
