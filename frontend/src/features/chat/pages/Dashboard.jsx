@@ -2,8 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useChat } from '../hooks/useChat';
 import { useDispatch } from 'react-redux';
-// import {handleGetChats} from "../services/chat.api.js";
+import { setCurrentChatId } from '../chat.Slice';
 import { initializeSocketConnection } from "../services/chat.socket"
+import ReactMarkdown from 'react-markdown';
 
 const Dashboard = () => {
   const user = useSelector((state) => state.auth.user);
@@ -32,6 +33,11 @@ const Dashboard = () => {
   const openChat = (chatId)=>{
     handleOpenChat(chatId);
   }
+
+  const handleNewChat = () => {
+    dispatch(setCurrentChatId(null));
+    setInput('');
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -73,7 +79,7 @@ const Dashboard = () => {
         {/* ── Nav Items ── */}
         <nav className="px-2 space-y-0.5 pb-3">
           {[
-            { label: 'New', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>, accent: true },
+            { label: 'New', onClick: handleNewChat, icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>, accent: true },
             // { label: 'Computer', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> },
             // { label: 'Spaces', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg> },
             // { label: 'Artefacts', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg> },
@@ -82,6 +88,7 @@ const Dashboard = () => {
           ].map((item) => (
             <button
               key={item.label}
+              onClick={item.onClick}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                 item.accent
                   ? 'text-cyan-400 hover:bg-cyan-400/10'
@@ -115,16 +122,7 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* ── Upgrade Plan ── */}
-        <div className="px-3 py-2">
-          <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 transition-colors">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
-            </span>
-            Upgrade plan
-          </button>
-        </div>
+
 
         {/* ── User Profile ── */}
         <div className="px-2 pb-3">
@@ -184,33 +182,47 @@ const Dashboard = () => {
 
         {/* ── Messages Area ── */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-3xl mx-auto px-6 py-8">
-            {messages.map((msg, idx) => (
-              msg.role === 'user' ? (
-                /* User message bubble */
-                <div key={idx} className="flex justify-end mb-6">
-                  <div className="px-4 py-2.5 rounded-2xl bg-neutral-800 text-neutral-100 text-[15px] max-w-[70%]">
-                    {msg.content}
-                  </div>
-                </div>
-              ) : (
-                /* AI response */
-                <div key={idx} className="mb-6">
-                  <p className="text-[15px] leading-7 text-neutral-200 whitespace-pre-wrap">
-                    {msg.content}
-                  </p>
-                </div>
-              )
-            ))}
-            {isLoading && (
-              <div className="flex items-center gap-1.5 py-4">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse [animation-delay:0.2s]" />
-                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse [animation-delay:0.4s]" />
+          {messages.length === 0 && !isLoading ? (
+            <div className="flex-1 flex flex-col items-center justify-center h-full px-6">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-emerald-600 flex items-center justify-center mb-8 shadow-lg shadow-cyan-500/20">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M12 2L9.5 9.5 2 12l7.5 2.5L12 22l2.5-7.5L22 12l-7.5-2.5L12 2z"/></svg>
               </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
+              <h1 className="text-[28px] font-medium text-white mb-3">
+                Where knowledge begins
+              </h1>
+              <p className="text-neutral-400 text-[16px] text-center max-w-md">
+                Ask anything and I'll find the best answers for you.
+              </p>
+            </div>
+          ) : (
+            <div className="max-w-3xl mx-auto px-6 py-8">
+              {messages.map((msg, idx) => (
+                msg.role === 'user' ? (
+                  /* User message bubble */
+                  <div key={idx} className="flex justify-end mb-6">
+                    <div className="px-4 py-2.5 rounded-2xl bg-neutral-800 text-neutral-100 text-[15px] max-w-[70%]">
+                      {msg.content}
+                    </div>
+                  </div>
+                ) : (
+                  /* AI response */
+                  <div key={idx} className="mb-6">
+                    <div className="text-[15px] leading-7 text-neutral-200 whitespace-pre-wrap prose prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-neutral-900 prose-pre:border prose-pre:border-neutral-800">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    </div>
+                  </div>
+                )
+              ))}
+              {isLoading && (
+                <div className="flex items-center gap-1.5 py-4">
+                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse [animation-delay:0.2s]" />
+                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse [animation-delay:0.4s]" />
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
         </div>
 
         {/* ── Input Bar ── */}
