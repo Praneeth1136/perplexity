@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/userAuth';
-
+import { useSelector } from 'react-redux';
 export default function Register() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -16,6 +16,15 @@ export default function Register() {
       navigate('/login');
     }
   }
+
+  const user = useSelector((state) => state.auth.user);
+  const loading = useSelector((state) => state.auth.loading);
+
+   useEffect(() => {
+    if (!loading && user) {
+      navigate('/');
+    }
+  }, [loading, user, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-950 px-4">
