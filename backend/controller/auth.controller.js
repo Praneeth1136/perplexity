@@ -352,3 +352,25 @@ export async function getMe(req, res) {
         user,
     });
 }
+
+
+
+// ─────────────────────────────────────────────────────────────
+// ADD THIS to the bottom of src/controller/auth.controller.js
+// (it's a standalone export — no other edits needed in that file)
+// ─────────────────────────────────────────────────────────────
+
+export async function logout(req, res) {
+    // Options MUST match the ones used in `login` when the cookie was set,
+    // otherwise the browser won't clear it.
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+    });
+
+    return res.status(200).json({
+        message: "Logged out successfully",
+        success: true,
+    });
+}

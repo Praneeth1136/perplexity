@@ -8,7 +8,7 @@ function App() {
 
   useEffect(() => {
     handleGetMe();
-  }, [handleGetMe]);
+  }, []);
 
   return (
     <>

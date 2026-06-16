@@ -1,14 +1,16 @@
+import { io } from "socket.io-client";
 
-import { io } from "socket.io-client"
+let socket = null;
 
-
-export const initializeSocketConnection = () => {
+export function connectSocket() {
+    if (socket) return socket;
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
-    const socket = io(BACKEND_URL, {
-        withCredentials: true
-    })
+    socket = io(BACKEND_URL, {
+        withCredentials: true,
+    });
+    return socket;
+}
 
-    socket.on("connect", () => {
-        console.log("Socket connected: ", socket.id)
-    })
+export function getSocket() {
+    return socket;
 }

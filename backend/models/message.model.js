@@ -8,17 +8,25 @@ const messageSchema = new mongoose.Schema(
             required: true,
         },
         content: {
-            type:String,
-            required:true,
+            type: String,
+            required: true,
         },
         role: {
             type: String,
             enum: ['user', 'ai'],
-            required:true,
+            required: true,
         },
-        
+        // Web sources returned by the Tavily search tool (only on AI messages)
+        sources: [
+            {
+                title: { type: String },
+                url: { type: String },
+            },
+        ],
+        // Image URLs returned by Tavily (only on AI messages)
+        images: [{ type: String }],
     },
-    {timestamps:true}
+    { timestamps: true }
 );
 
 const messageModel = mongoose.model('Message', messageSchema);

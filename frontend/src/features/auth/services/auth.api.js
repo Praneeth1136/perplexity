@@ -17,6 +17,16 @@ export async function login({ email, password }) {
   return response.data;
 }
 
+export async function logout() {
+  const response = await authApi.post('/logout');
+  return response.data;
+}
+
+export async function resendVerification({ email }) {
+  const response = await authApi.post('/resend-verification', { email });
+  return response.data;
+}
+
 export async function getMe() {
   const response = await authApi.get('/get-me');
   return response.data;
